@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Main : MonoBehaviour
 {
-    const float squareWidth = 1.5f;
+    const float squareWidth = 1.0f;
     const float tickLength = 0.6f;
     const float latency = 0.1f;
     // Camera
@@ -11,6 +12,7 @@ public class Main : MonoBehaviour
     float eulerZ = 0;
     // In square position coordinates
     Vector2Int playerPos = new Vector2Int();
+    Vector2Int jadPos = new Vector2Int(-3, 5);
     float nextTickTime = 0;
     // The next positions the player will be at, at each tick
     List<Vector2Int> playerRoute = new List<Vector2Int>();
@@ -20,42 +22,63 @@ public class Main : MonoBehaviour
     /// </summary>
     ClientState clientState = new ClientState();
 
+    public Camera Camera;
+    public Text TopLeftText;
     public Transform CameraTransform;
     public Transform PlayerTransform;
+    public Transform JadTransform;
     public LineRenderer LineRenderer;
     public Animator JadAnimator;
 
     // Start is called before the first frame update
     void Start()
     {
+        Camera.pixelRect = new Rect(0, 211, Screen.width-311, Screen.height-211);
+        JadTransform.position = new Vector3((jadPos.x + 0.5f) * squareWidth, 0, (jadPos.y + 0.5f) * squareWidth);
         Tick();
     }
 
     // Update is called once per frame
     void Update()
     {
-        float angleChange = 50f * Time.deltaTime;
+        float angleChangeY = 100f * Time.deltaTime;
+        float angleChangeZ = 30f * Time.deltaTime;
         if (Input.GetKey(KeyCode.A))
         {
-            eulerY += angleChange;
+            eulerY += angleChangeY;
         }
         if (Input.GetKey(KeyCode.D))
         {
-            eulerY -= angleChange;
+            eulerY -= angleChangeY;
         }
         if (Input.GetKey(KeyCode.W))
         {
-            eulerZ += angleChange;
+            eulerZ += angleChangeZ;
         }
         if (Input.GetKey(KeyCode.S))
         {
-            eulerZ -= angleChange;
+            eulerZ -= angleChangeZ;
         }
         eulerZ = Mathf.Clamp(eulerZ, 10, 50);
 
+        RaycastHit hit;
+        bool didHit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit);
+        didHit = didHit && Camera.pixelRect.Contains(Input.mousePosition);
+        TopLeftText.text = "";
+        if (didHit)
+        {
+            if (hit.collider.name == "Jad")
+            {
+                TopLeftText.text = "Attack TzTok-Jad (level 702)";
+            }
+            else
+            {
+                TopLeftText.text = "Walk Here";
+            }
+        }
+
         if (Input.GetMouseButtonDown(0)) {
-            RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
+            if (didHit && hit.collider.name == "Ground")
             {
                 int squareX = (int)Mathf.Floor(hit.point.x / squareWidth);
                 int squareY = (int)Mathf.Floor(hit.point.z / squareWidth);
@@ -91,6 +114,7 @@ public class Main : MonoBehaviour
         PlayerTransform.position = new Vector3((playerX + 0.5f) * squareWidth, 1, (playerY + 0.5f) * squareWidth);
         CameraTransform.localPosition = Quaternion.Euler(0, eulerY, eulerZ) * new Vector3(5, 0, 0);
         CameraTransform.LookAt(PlayerTransform);
+        JadTransform.LookAt(new Vector3(PlayerTransform.position.x, JadTransform.position.y, PlayerTransform.position.z));
     }
 
     void FixedUpdate()
