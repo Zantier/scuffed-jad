@@ -6,10 +6,12 @@ using UnityEngine;
 /// </summary>
 public class ClientState
 {
-    public Vector2Int dest = new Vector2Int();
+    public Vector2Int Dest = new Vector2Int();
+    public ProtectPrayer ProtectPrayer;
 
     public void CopyFrom(ClientState state)
     {
-        dest = state.dest;
+        Dest = state.Dest;
+        ProtectPrayer = state.ProtectPrayer;
     }
 }

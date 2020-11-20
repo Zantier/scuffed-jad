@@ -10,18 +10,21 @@ public class Main : MonoBehaviour
     // Camera
     float eulerY = 0;
     float eulerZ = 0;
+    float cameraDist = 5;
     // In square position coordinates
     Vector2Int playerPos = new Vector2Int();
     Vector2Int jadPos = new Vector2Int(-3, 5);
     float nextTickTime = 0;
     // The next positions the player will be at, at each tick
     List<Vector2Int> playerRoute = new List<Vector2Int>();
-    ClientState serverState = new ClientState();
     /// <summary>
     /// Always has the latest client state
     /// </summary>
     ClientState clientState = new ClientState();
+    ClientState preServerState = new ClientState();
+    ClientState serverState = new ClientState();
 
+    public UI UI;
     public Camera Camera;
     public Text TopLeftText;
     public Transform CameraTransform;
@@ -29,6 +32,19 @@ public class Main : MonoBehaviour
     public Transform JadTransform;
     public LineRenderer LineRenderer;
     public Animator JadAnimator;
+
+    public void ClickProtectMagic()
+    {
+        ClickPrayer(ProtectPrayer.Magic);
+    }
+    public void ClickProtectRanged()
+    {
+        ClickPrayer(ProtectPrayer.Ranged);
+    }
+    public void ClickProtectMelee()
+    {
+        ClickPrayer(ProtectPrayer.Melee);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -41,6 +57,15 @@ public class Main : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            UI.ShowPrayerPanel(false);
+        }
+        else if (Input.GetKeyDown(KeyCode.R))
+        {
+            UI.ShowPrayerPanel(true);
+        }
+
         float angleChangeY = 100f * Time.deltaTime;
         float angleChangeZ = 30f * Time.deltaTime;
         if (Input.GetKey(KeyCode.A))
@@ -60,6 +85,9 @@ public class Main : MonoBehaviour
             eulerZ -= angleChangeZ;
         }
         eulerZ = Mathf.Clamp(eulerZ, 10, 50);
+
+        cameraDist -= 0.05f * Input.mouseScrollDelta.y;
+        cameraDist = Mathf.Clamp(cameraDist, 2, 10);
 
         RaycastHit hit;
         bool didHit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit);
@@ -88,14 +116,14 @@ public class Main : MonoBehaviour
                 };
                 LineRenderer.SetPositions(positions);
                 LineRenderer.enabled = true;
-                clientState.dest = new Vector2Int(squareX, squareY);
+                clientState.Dest = new Vector2Int(squareX, squareY);
             }
         }
 
         // If the server can receive the data before the next tick
         if (Time.time + latency < nextTickTime)
         {
-            serverState.CopyFrom(clientState);
+            preServerState.CopyFrom(clientState);
         }
 
         if (Time.time >= nextTickTime)
@@ -112,9 +140,12 @@ public class Main : MonoBehaviour
             playerY = (1 - fraction) * playerPos.y + fraction * playerRoute[0].y;
         }
         PlayerTransform.position = new Vector3((playerX + 0.5f) * squareWidth, 1, (playerY + 0.5f) * squareWidth);
-        CameraTransform.localPosition = Quaternion.Euler(0, eulerY, eulerZ) * new Vector3(5, 0, 0);
+        CameraTransform.localPosition = Quaternion.Euler(0, eulerY, eulerZ) * new Vector3(cameraDist, 0, 0);
         CameraTransform.LookAt(PlayerTransform);
         JadTransform.LookAt(new Vector3(PlayerTransform.position.x, JadTransform.position.y, PlayerTransform.position.z));
+        UI.SetClientProtectPrayer(clientState.ProtectPrayer);
+        Vector2 overheadPos = Camera.main.WorldToScreenPoint(PlayerTransform.position + new Vector3(0, 1.5f, 0));
+        UI.SetServerProtectPrayer(serverState.ProtectPrayer, overheadPos);
     }
 
     void FixedUpdate()
@@ -125,6 +156,7 @@ public class Main : MonoBehaviour
     private void Tick()
     {
         nextTickTime = Time.time + tickLength;
+        serverState.CopyFrom(preServerState);
 
         if (playerRoute.Count > 0)
         {
@@ -133,19 +165,30 @@ public class Main : MonoBehaviour
         }
 
         playerRoute.Clear();
-        if (playerPos != serverState.dest)
+        if (playerPos != serverState.Dest)
         {
             int posX = playerPos.x;
             int posY = playerPos.y;
-            while (posX != serverState.dest.x || posY != serverState.dest.y)
+            while (posX != serverState.Dest.x || posY != serverState.Dest.y)
             {
-                posX += Sign(serverState.dest.x - posX);
-                posY += Sign(serverState.dest.y - posY);
+                posX += Sign(serverState.Dest.x - posX);
+                posY += Sign(serverState.Dest.y - posY);
                 playerRoute.Add(new Vector2Int(posX, posY));
             }
         }
 
-        serverState.CopyFrom(clientState);
+        preServerState.CopyFrom(clientState);
+    }
+    private void ClickPrayer(ProtectPrayer prayer)
+    {
+        if (clientState.ProtectPrayer == prayer)
+        {
+            clientState.ProtectPrayer = ProtectPrayer.None;
+        }
+        else
+        {
+            clientState.ProtectPrayer = prayer;
+        }
     }
 
     private int Sign(int x)
