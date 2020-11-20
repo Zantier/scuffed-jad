@@ -23,6 +23,7 @@ public class Main : MonoBehaviour
     public Transform CameraTransform;
     public Transform PlayerTransform;
     public LineRenderer LineRenderer;
+    public Animator JadAnimator;
 
     // Start is called before the first frame update
     void Start()
@@ -103,6 +104,7 @@ public class Main : MonoBehaviour
 
         if (playerRoute.Count > 0)
         {
+            JadAnimator.SetTrigger("melee");
             playerPos = playerRoute[0];
         }
 
