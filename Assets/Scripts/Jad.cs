@@ -10,6 +10,10 @@ public class Jad : MonoBehaviour
     ProtectPrayer State;
     Animator Animator;
     Vector2Int pos = new Vector2Int(-3, 5);
+    AudioSource audioSource;
+
+    public AudioClip audioMagic;
+    public AudioClip audioExplode;
 
     /// <summary>
     /// Tick jad, and get what kind of damage he's doing
@@ -43,6 +47,7 @@ public class Jad : MonoBehaviour
                 if (TickCount == 1)
                 {
                     Animator.SetTrigger("magic");
+                    audioSource.PlayOneShot(audioMagic);
                 }
                 else if (TickCount == 4)
                 {
@@ -62,6 +67,7 @@ public class Jad : MonoBehaviour
                 else if (TickCount == 4)
                 {
                     result = ProtectPrayer.Ranged;
+                    audioSource.PlayOneShot(audioExplode);
                 }
                 else if (TickCount == 5)
                 {
@@ -87,6 +93,7 @@ public class Jad : MonoBehaviour
     void Start()
     {
         Animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
         transform.position = new Vector3((pos.x + 0.5f) * squareWidth, 0, (pos.y + 0.5f) * squareWidth);
     }
 
