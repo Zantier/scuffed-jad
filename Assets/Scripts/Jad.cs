@@ -12,8 +12,10 @@ public class Jad : MonoBehaviour
     Vector2Int pos = new Vector2Int(-3, 5);
     AudioSource audioSource;
 
-    public AudioClip audioMagic;
-    public AudioClip audioExplode;
+    public AudioClip AudioMagic;
+    public AudioClip AudioExplode;
+    public GameObject ProjectilePrefab;
+    public Transform PlayerTransform;
 
     /// <summary>
     /// Tick jad, and get what kind of damage he's doing
@@ -47,11 +49,14 @@ public class Jad : MonoBehaviour
                 if (TickCount == 1)
                 {
                     Animator.SetTrigger("magic");
-                    audioSource.PlayOneShot(audioMagic);
+                    audioSource.PlayOneShot(AudioMagic);
                 }
                 else if (TickCount == 4)
                 {
                     result = ProtectPrayer.Magic;
+                    Vector3 projectilePos = transform.position + new Vector3(0, 4.5f, 0) + transform.forward;
+                    GameObject projectile = Instantiate(ProjectilePrefab, projectilePos, Quaternion.identity);
+                    projectile.GetComponent<Projectile>().Target = PlayerTransform;
                 }
                 else if (TickCount == 5)
                 {
@@ -67,7 +72,9 @@ public class Jad : MonoBehaviour
                 else if (TickCount == 4)
                 {
                     result = ProtectPrayer.Ranged;
-                    audioSource.PlayOneShot(audioExplode);
+                    audioSource.PlayOneShot(AudioExplode);
+                    GameObject projectile = Instantiate(ProjectilePrefab, PlayerTransform.position + new Vector3(0, 10, 0), Quaternion.identity);
+                    projectile.GetComponent<Projectile>().Target = PlayerTransform;
                 }
                 else if (TickCount == 5)
                 {
