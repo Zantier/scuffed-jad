@@ -11,5 +11,7 @@ Your health does not drain. After an attack, your health displays as high or low
 ### Controls
 
 Click: move, and switch prayers
+
 W, A, S, D, scroll: camera
+
 E, R: hide/show prayer panel
