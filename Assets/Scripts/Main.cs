@@ -13,7 +13,6 @@ public class Main : MonoBehaviour
     float cameraDist = 5;
     // In square position coordinates
     Vector2Int playerPos = new Vector2Int();
-    Vector2Int jadPos = new Vector2Int(-3, 5);
     float nextTickTime = 0;
     // The next positions the player will be at, at each tick
     List<Vector2Int> playerRoute = new List<Vector2Int>();
@@ -29,9 +28,8 @@ public class Main : MonoBehaviour
     public Text TopLeftText;
     public Transform CameraTransform;
     public Transform PlayerTransform;
-    public Transform JadTransform;
     public LineRenderer LineRenderer;
-    public Animator JadAnimator;
+    public Jad Jad;
 
     public void ClickProtectMagic()
     {
@@ -50,7 +48,6 @@ public class Main : MonoBehaviour
     void Start()
     {
         Camera.pixelRect = new Rect(0, 211, Screen.width-311, Screen.height-211);
-        JadTransform.position = new Vector3((jadPos.x + 0.5f) * squareWidth, 0, (jadPos.y + 0.5f) * squareWidth);
         Tick();
     }
 
@@ -86,7 +83,7 @@ public class Main : MonoBehaviour
         }
         eulerZ = Mathf.Clamp(eulerZ, 10, 50);
 
-        cameraDist -= 0.05f * Input.mouseScrollDelta.y;
+        cameraDist -= 0.1f * Input.mouseScrollDelta.y;
         cameraDist = Mathf.Clamp(cameraDist, 2, 10);
 
         RaycastHit hit;
@@ -142,9 +139,9 @@ public class Main : MonoBehaviour
         PlayerTransform.position = new Vector3((playerX + 0.5f) * squareWidth, 1, (playerY + 0.5f) * squareWidth);
         CameraTransform.localPosition = Quaternion.Euler(0, eulerY, eulerZ) * new Vector3(cameraDist, 0, 0);
         CameraTransform.LookAt(PlayerTransform);
-        JadTransform.LookAt(new Vector3(PlayerTransform.position.x, JadTransform.position.y, PlayerTransform.position.z));
+        Jad.transform.LookAt(new Vector3(PlayerTransform.position.x, Jad.transform.position.y, PlayerTransform.position.z));
         UI.SetClientProtectPrayer(clientState.ProtectPrayer);
-        Vector2 overheadPos = Camera.main.WorldToScreenPoint(PlayerTransform.position + new Vector3(0, 1.5f, 0));
+        Vector2 overheadPos = Camera.main.WorldToScreenPoint(PlayerTransform.position + new Vector3(0, 1.8f, 0));
         UI.SetServerProtectPrayer(serverState.ProtectPrayer, overheadPos);
     }
 
@@ -160,7 +157,6 @@ public class Main : MonoBehaviour
 
         if (playerRoute.Count > 0)
         {
-            JadAnimator.SetTrigger("melee");
             playerPos = playerRoute[0];
         }
 
@@ -175,6 +171,13 @@ public class Main : MonoBehaviour
                 posY += Sign(serverState.Dest.y - posY);
                 playerRoute.Add(new Vector2Int(posX, posY));
             }
+        }
+
+        ProtectPrayer damage = Jad.Tick(playerPos);
+        if (damage != ProtectPrayer.None)
+        {
+            int newHealth = damage == serverState.ProtectPrayer ? 1 : 0;
+            UI.SetHealth(newHealth);
         }
 
         preServerState.CopyFrom(clientState);
@@ -193,16 +196,6 @@ public class Main : MonoBehaviour
 
     private int Sign(int x)
     {
-        if (x < 0)
-        {
-            return -1;
-        }
-
-        if (x > 0)
-        {
-            return 1;
-        }
-
-        return 0;
+        return (x > 0 ? 1 : 0) - (x < 0 ? 1 : 0);
     }
 }

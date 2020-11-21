@@ -10,10 +10,12 @@ public class UI : MonoBehaviour
     public GameObject ProtectRangedOn;
     public GameObject ProtectMeleeOn;
     public RectTransform OverheadTransform;
+    public GameObject OverheadPrayer;
     public Image OverheadImage;
     public Sprite ProtectMagicSprite;
     public Sprite ProtectRangedSprite;
     public Sprite ProtectMeleeSprite;
+    public Slider HealthSlider;
 
     public void ShowPrayerPanel(bool doShow)
     {
@@ -43,10 +45,11 @@ public class UI : MonoBehaviour
     public void SetServerProtectPrayer(ProtectPrayer prayer, Vector2 pos)
     {
         OverheadTransform.anchoredPosition = pos;
+        OverheadPrayer.SetActive(true);
         switch (prayer)
         {
             case ProtectPrayer.None:
-                OverheadTransform.anchoredPosition = new Vector2(-10, -10);
+                OverheadPrayer.SetActive(false);
                 break;
             case ProtectPrayer.Magic:
                 OverheadImage.sprite = ProtectMagicSprite;
@@ -58,6 +61,11 @@ public class UI : MonoBehaviour
                 OverheadImage.sprite = ProtectMeleeSprite;
                 break;
         }
+    }
+
+    public void SetHealth(int health)
+    {
+        HealthSlider.value = health;
     }
 
     // Start is called before the first frame update

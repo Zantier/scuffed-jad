@@ -6,6 +6,12 @@ ModelImporter:
   - first:
       74: 6113824026666207980
     second: Armature|melee
+  - first:
+      74: 7706528993096848868
+    second: Armature|magic
+  - first:
+      74: 3568245001444579263
+    second: Armature|ranged
   externalObjects: {}
   materials:
     materialImportMode: 1
