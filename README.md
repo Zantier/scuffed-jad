@@ -2,7 +2,7 @@
 
 https://zantier.github.io/scuffed-jad/
 
-Practice prayer switching in the browser against an immitation TzTok-Jad from Old School RuneScape.
+Practice prayer switching in the browser against an imitation TzTok-Jad from Old School RuneScape.
 
 Jad will only perform melee attacks when you stand next to it.
 
