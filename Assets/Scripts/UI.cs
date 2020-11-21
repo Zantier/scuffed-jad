@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class UI : MonoBehaviour
 {
+    private int healthCount = 10;
+
     public GameObject PrayerPanel;
     public GameObject ProtectMagicOn;
     public GameObject ProtectRangedOn;
@@ -66,12 +68,23 @@ public class UI : MonoBehaviour
     public void SetHealth(int health)
     {
         HealthSlider.value = health;
+        HealthSlider.gameObject.SetActive(true);
+        healthCount = 0;
+    }
+
+    public void Tick()
+    {
+        healthCount++;
+        if (healthCount == 5)
+        {
+            HealthSlider.gameObject.SetActive(false);
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        HealthSlider.gameObject.SetActive(false);
     }
 
     // Update is called once per frame

@@ -180,6 +180,8 @@ public class Main : MonoBehaviour
             UI.SetHealth(newHealth);
         }
 
+        UI.Tick();
+
         preServerState.CopyFrom(clientState);
     }
     private void ClickPrayer(ProtectPrayer prayer)
