@@ -107,9 +107,10 @@ public class Main : MonoBehaviour
             {
                 int squareX = (int)Mathf.Floor(hit.point.x / squareWidth);
                 int squareY = (int)Mathf.Floor(hit.point.z / squareWidth);
+                float height = 0.05f;
                 Vector3[] positions = {
-                    new Vector3(squareX * squareWidth, 0.2f, squareY * squareWidth), new Vector3((squareX + 1) * squareWidth, 0.2f, squareY * squareWidth),
-                    new Vector3((squareX + 1) * squareWidth, 0.2f, (squareY + 1) * squareWidth), new Vector3(squareX * squareWidth, 0.2f, (squareY + 1) * squareWidth)
+                    new Vector3(squareX * squareWidth, height, squareY * squareWidth), new Vector3((squareX + 1) * squareWidth, height, squareY * squareWidth),
+                    new Vector3((squareX + 1) * squareWidth, height, (squareY + 1) * squareWidth), new Vector3(squareX * squareWidth, height, (squareY + 1) * squareWidth)
                 };
                 LineRenderer.SetPositions(positions);
                 LineRenderer.enabled = true;
