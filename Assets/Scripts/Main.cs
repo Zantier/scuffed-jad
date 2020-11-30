@@ -9,8 +9,8 @@ public class Main : MonoBehaviour
     const float latency = 0.1f;
     // Camera
     float eulerY = 0;
-    float eulerZ = 0;
-    float cameraDist = 5;
+    float eulerZ = 30;
+    float cameraDist = 7;
     // In square position coordinates
     Vector2Int playerPos = new Vector2Int();
     float nextTickTime = 0;
@@ -84,7 +84,7 @@ public class Main : MonoBehaviour
         eulerZ = Mathf.Clamp(eulerZ, 10, 50);
 
         cameraDist -= 0.1f * Input.mouseScrollDelta.y;
-        cameraDist = Mathf.Clamp(cameraDist, 2, 10);
+        cameraDist = Mathf.Clamp(cameraDist, 4, 15);
 
         RaycastHit hit;
         bool didHit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit);
