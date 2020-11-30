@@ -22,6 +22,7 @@ public class Main : MonoBehaviour
     ClientState clientState = new ClientState();
     ClientState preServerState = new ClientState();
     ClientState serverState = new ClientState();
+    List<Jad> jads = new List<Jad>();
 
     public UI UI;
     public Camera Camera;
@@ -29,7 +30,7 @@ public class Main : MonoBehaviour
     public Transform CameraTransform;
     public Transform PlayerTransform;
     public LineRenderer LineRenderer;
-    public Jad Jad;
+    public GameObject JadPrefab;
 
     public void ClickProtectMagic()
     {
@@ -44,9 +45,47 @@ public class Main : MonoBehaviour
         ClickPrayer(ProtectPrayer.Melee);
     }
 
+    public void ResetJads1()
+    {
+        ResetJads(1, 8, 0);
+    }
+
+    public void ResetJads3()
+    {
+        ResetJads(3, 9, 3);
+    }
+
+    public void ResetJads6()
+    {
+        ResetJads(6, 6, 1);
+    }
+
+    public void ResetJads(int count, int rangedSpeed, int tickInterval)
+    {
+        foreach (Jad jad in jads)
+        {
+            Destroy(jad.gameObject);
+        }
+
+        jads.Clear();
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject jadObject = Instantiate(JadPrefab);
+            Jad jad = jadObject.GetComponent<Jad>();
+            jad.PlayerTransform = PlayerTransform;
+            float angle = 0.75f * Mathf.PI + i * 2 * Mathf.PI / count;
+            jad.Pos = new Vector2Int(Mathf.RoundToInt(8 * Mathf.Cos(angle)), Mathf.RoundToInt(8 * Mathf.Sin(angle)));
+            jad.RangedSpeed = rangedSpeed;
+            jad.SetTickDelay(3 + i * tickInterval);
+            jads.Add(jad);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        ResetJads1();
         Camera.pixelRect = new Rect(0, 211, Screen.width-311, Screen.height-211);
         Tick();
     }
@@ -140,7 +179,10 @@ public class Main : MonoBehaviour
         PlayerTransform.position = new Vector3((playerX + 0.5f) * squareWidth, 1, (playerY + 0.5f) * squareWidth);
         CameraTransform.localPosition = Quaternion.Euler(0, eulerY, eulerZ) * new Vector3(cameraDist, 0, 0);
         CameraTransform.LookAt(PlayerTransform);
-        Jad.transform.LookAt(new Vector3(PlayerTransform.position.x, Jad.transform.position.y, PlayerTransform.position.z));
+        foreach (Jad jad in jads)
+        {
+            jad.transform.LookAt(new Vector3(PlayerTransform.position.x, jad.transform.position.y, PlayerTransform.position.z));
+        }
         UI.SetClientProtectPrayer(clientState.ProtectPrayer);
         Vector2 overheadPos = Camera.main.WorldToScreenPoint(PlayerTransform.position + new Vector3(0, 1.0f, 0));
         UI.SetServerProtectPrayer(serverState.ProtectPrayer, overheadPos);
@@ -174,10 +216,20 @@ public class Main : MonoBehaviour
             }
         }
 
-        ProtectPrayer damage = Jad.Tick(playerPos);
-        if (damage != ProtectPrayer.None)
+        bool doAttack = false;
+        bool doDamage = false;
+        foreach (Jad jad in jads)
         {
-            int newHealth = damage == serverState.ProtectPrayer ? 1 : 0;
+            ProtectPrayer damage = jad.Tick(playerPos);
+            if (damage != ProtectPrayer.None)
+            {
+                doAttack = true;
+                doDamage = doDamage || damage != serverState.ProtectPrayer;
+            }
+        }
+
+        if (doAttack) {
+            int newHealth = doDamage ? 0 : 1;
             UI.SetHealth(newHealth);
         }
 

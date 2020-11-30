@@ -6,16 +6,32 @@ public class Jad : MonoBehaviour
 {
     const float squareWidth = 1.0f;
 
+    /// <summary>
+    /// How many ticks have we been in the current state
+    /// </summary>
     int TickCount;
     ProtectPrayer State;
     Animator Animator;
-    Vector2Int pos = new Vector2Int(-3, 5);
     AudioSource audioSource;
 
+    public Vector2Int Pos = new Vector2Int(-3, 5);
+    /// <summary>
+    /// How many ticks between ranged attacks
+    /// </summary>
+    public int RangedSpeed = 8;
+    public int MeleeSpeed = 4;
     public AudioClip AudioMagic;
     public AudioClip AudioExplode;
     public GameObject ProjectilePrefab;
     public Transform PlayerTransform;
+
+    /// <summary>
+    /// Delay Jad from attacking at the start for this many ticks
+    /// </summary>
+    public void SetTickDelay(int count)
+    {
+        TickCount -= count;
+    }
 
     /// <summary>
     /// Tick jad, and get what kind of damage he's doing
@@ -25,26 +41,29 @@ public class Jad : MonoBehaviour
         ProtectPrayer result = ProtectPrayer.None;
         TickCount++;
 
+        bool doAttack = State == ProtectPrayer.None && TickCount > 0 ||
+            State == ProtectPrayer.Melee && TickCount > MeleeSpeed ||
+            TickCount > RangedSpeed;
+
+        if (doAttack)
+        {
+            int distX = Mathf.Abs(playerPos.x - Pos.x);
+            int distY = Mathf.Abs(playerPos.y - Pos.y);
+            if (distX >= 3 || distY >= 3)
+            {
+                TickCount = 1;
+                int rangeMax = 3;
+                if ((distX == 3 || distY == 3) && distX + distY < 6)
+                {
+                    rangeMax++;
+                }
+
+                State = (ProtectPrayer)Random.Range(1, rangeMax);
+            }
+        }
+
         switch (State)
         {
-            case ProtectPrayer.None:
-                if (TickCount >= 3)
-                {
-                    int distX = Mathf.Abs(playerPos.x - pos.x);
-                    int distY = Mathf.Abs(playerPos.y - pos.y);
-                    if (distX >= 3 || distY >= 3)
-                    {
-                        TickCount = 0;
-                        int rangeMax = 3;
-                        if ((distX == 3 || distY == 3) && distX + distY < 6)
-                        {
-                            rangeMax++;
-                        }
-
-                        State = (ProtectPrayer)Random.Range(1, rangeMax);
-                    }
-                }
-                break;
             case ProtectPrayer.Magic:
                 if (TickCount == 1)
                 {
@@ -57,11 +76,6 @@ public class Jad : MonoBehaviour
                     Vector3 projectilePos = transform.position + new Vector3(0, 4.5f, 0) + transform.forward;
                     GameObject projectile = Instantiate(ProjectilePrefab, projectilePos, Quaternion.identity);
                     projectile.GetComponent<Projectile>().Target = PlayerTransform;
-                }
-                else if (TickCount == 5)
-                {
-                    TickCount = 0;
-                    State = ProtectPrayer.None;
                 }
                 break;
             case ProtectPrayer.Ranged:
@@ -76,18 +90,11 @@ public class Jad : MonoBehaviour
                     GameObject projectile = Instantiate(ProjectilePrefab, PlayerTransform.position + new Vector3(0, 10, 0), Quaternion.identity);
                     projectile.GetComponent<Projectile>().Target = PlayerTransform;
                 }
-                else if (TickCount == 5)
-                {
-                    TickCount = 0;
-                    State = ProtectPrayer.None;
-                }
                 break;
             case ProtectPrayer.Melee:
                 if (TickCount == 1)
                 {
-                    TickCount = 0;
                     result = ProtectPrayer.Melee;
-                    State = ProtectPrayer.None;
                     Animator.SetTrigger("melee");
                 }
                 break;
@@ -101,7 +108,7 @@ public class Jad : MonoBehaviour
     {
         Animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
-        transform.position = new Vector3((pos.x + 0.5f) * squareWidth, 0, (pos.y + 0.5f) * squareWidth);
+        transform.position = new Vector3((Pos.x + 0.5f) * squareWidth, 0, (Pos.y + 0.5f) * squareWidth);
     }
 
     // Update is called once per frame
