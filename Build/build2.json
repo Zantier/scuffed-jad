@@ -1,0 +1,16 @@
+{
+"companyName": "DefaultCompany",
+"productName": "scuffed-jad",
+"productVersion": "0.1",
+"dataUrl": "build2.data.unityweb",
+"wasmCodeUrl": "build2.wasm.code.unityweb",
+"wasmFrameworkUrl": "build2.wasm.framework.unityweb",
+"graphicsAPI": ["WebGL 2.0","WebGL 1.0"],
+"webglContextAttributes": {"preserveDrawingBuffer": false},
+"splashScreenStyle": "Dark",
+"backgroundColor": "#231F20",
+"cacheControl": {"default": "must-revalidate"},
+"developmentBuild": false,
+"multithreading": false,
+"unityVersion": "2019.4.15f1"
+}
