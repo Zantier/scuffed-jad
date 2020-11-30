@@ -142,7 +142,7 @@ public class Main : MonoBehaviour
         CameraTransform.LookAt(PlayerTransform);
         Jad.transform.LookAt(new Vector3(PlayerTransform.position.x, Jad.transform.position.y, PlayerTransform.position.z));
         UI.SetClientProtectPrayer(clientState.ProtectPrayer);
-        Vector2 overheadPos = Camera.main.WorldToScreenPoint(PlayerTransform.position + new Vector3(0, 1.8f, 0));
+        Vector2 overheadPos = Camera.main.WorldToScreenPoint(PlayerTransform.position + new Vector3(0, 1.0f, 0));
         UI.SetServerProtectPrayer(serverState.ProtectPrayer, overheadPos);
     }
 
